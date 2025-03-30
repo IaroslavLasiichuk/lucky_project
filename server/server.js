@@ -1,30 +1,28 @@
-// This example sets up an endpoint using the Express framework.
-// Watch this video to get started: https://youtu.be/rPR2aJ6XnAc.
-
+require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const app = express();
-const stripe = require('stripe')('sk_test_BQokikJOvBiI2HlWgH4olfQ2')
+app.use(cors());
+app.use(bodyParser.json());
 
-app.post('/create-checkout-session', async (req, res) => {
-  const session = await stripe.checkout.sessions.create({
-    line_items: [
-      {
-        price_data: {
-          currency: 'usd',
-          product_data: {
-            name: 'T-shirt',
-          },
-          unit_amount: 2000,
-        },
-        quantity: 1,
-      },
-    ],
-    mode: 'payment',
-    success_url: 'http://localhost:4242/success',
-    cancel_url: 'http://localhost:4242/cancel',
-  });
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+    const { amount, currency, description } = req.body;
 
-  res.redirect(303, session.url);
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount, // amount in cents
+      currency,
+      description,
+      payment_method_types: ['card'],
+    });
+
+    res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
-app.listen(4242, () => console.log(`Listening on port ${4242}!`));
+app.listen(5000, () => console.log('Server running on port 5000'));
