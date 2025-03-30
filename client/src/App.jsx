@@ -8,8 +8,9 @@ function App() {
 
   return (
     <>
-   
-       <h1>Hello</h1>
+    <form action="/create-checkout-session" method="POST">
+      <button type="submit">Checkout</button>
+    </form>
     </>
   )
 }
