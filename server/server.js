@@ -1,28 +1,28 @@
-require('dotenv').config();
+// This example sets up an endpoint using the Express framework.
+// To learn more about Express, watch this video: https://youtu.be/rPR2aJ6XnAc.
 const express = require('express');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
 
-app.post('/create-payment-intent', async (req, res) => {
-  try {
-    const { amount, currency, description } = req.body;
+const stripe = require('stripe')('sk_test_51NHF7iIR6WFhZtkiVnEgaAqWgFBpxYLH4KndpJjyoomM3ivX0XFdXfXS1ij5oiXlGlnKsool6X9DxLcjwGOIy2Vu00MLdLOsJr');
 
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount, // amount in cents
-      currency,
-      description,
-      payment_method_types: ['card'],
-    });
+app.post('/create-checkout-session', async (req, res) => {
+  const session = await stripe.checkout.sessions.create({
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: 'T-shirt',
+        },
+        unit_amount: 2000,
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    ui_mode: 'embedded',
+    return_url: 'https://example.com/checkout/return?session_id={CHECKOUT_SESSION_ID}'
+  });
 
-    res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+  res.send({clientSecret: session.client_secret});
 });
 
-app.listen(5000, () => console.log('Server running on port 5000'));
+app.listen(4242, () => console.log(`Listening on port ${4242}!`));
