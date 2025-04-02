@@ -1,34 +1,53 @@
-import * as React from 'react';
-import {loadStripe} from '@stripe/stripe-js';
+import React, { useState, useEffect } from "react";
+import { loadStripe } from "@stripe/stripe-js";
+import { Elements } from "@stripe/react-stripe-js";
 import {
-  EmbeddedCheckoutProvider,
-  EmbeddedCheckout
-} from '@stripe/react-stripe-js';
+  BrowserRouter as Router,
+  Routes,
+  Route
+} from 'react-router-dom';
 
-// Make sure to call `loadStripe` outside of a component’s render to avoid
-// recreating the `Stripe` object on every render.
-const stripePromise = loadStripe('pk_test_123');
+import CheckoutForm from "./CheckoutForm";
+import CompletePage from "./CompletePage";
+import "./App.css";
 
-const App = () => {
-  const fetchClientSecret = useCallback(() => {
-    // Create a Checkout Session
-    return fetch("/create-checkout-session", {
+// Make sure to call loadStripe outside of a component’s render to avoid
+// recreating the Stripe object on every render.
+// This is your test publishable API key.
+const stripePromise = loadStripe("pk_test_51NHF7iIR6WFhZtkiLhFgXogHZPheC20RMZ9avavnX7yD6XY5YcdZoZYrttnSlPvEjPrXmv1qRKJ6263LD8kOY9pL00oAAnNgoM");
+
+export default function App() {
+  const [clientSecret, setClientSecret] = useState("");
+
+  useEffect(() => {
+    // Create PaymentIntent as soon as the page loads
+    fetch("http://localhost:4242/create-payment-intent", {
       method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: [{ id: "xl-tshirt", amount: 1000 }] }),
     })
       .then((res) => res.json())
-      .then((data) => data.clientSecret);
+      .then((data) => setClientSecret(data.clientSecret));
   }, []);
 
-  const options = {fetchClientSecret};
+  const appearance = {
+    theme: 'stripe',
+  };
+  // Enable the skeleton loader UI for optimal loading.
+  const loader = 'auto';
 
   return (
-    <div id="checkout">
-      <EmbeddedCheckoutProvider
-        stripe={stripePromise}
-        options={options}
-      >
-        <EmbeddedCheckout />
-      </EmbeddedCheckoutProvider>
-    </div>
-  )
+    <Router>
+      <div className="App">
+        {clientSecret && (
+          <Elements options={{clientSecret, appearance, loader}} stripe={stripePromise}>
+            <Routes>
+              <Route path="/checkout" element={<CheckoutForm />} />
+              <Route path="/complete" element={<CompletePage />} />
+            </Routes>
+          </Elements>
+        )}
+      </div>
+    </Router>
+  );
 }
