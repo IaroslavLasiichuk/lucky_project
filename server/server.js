@@ -1,42 +1,40 @@
 const express = require("express");
+const cors = require("cors");
+const stripe = require("stripe")("sk_test_51NHF7iIR6WFhZtkiVnEgaAqWgFBpxYLH4KndpJjyoomM3ivX0XFdXfXS1ij5oiXlGlnKsool6X9DxLcjwGOIy2Vu00MLdLOsJr");
+
 const app = express();
-const cors = require('cors');
-// This is your test secret API key.
-const stripe = require("stripe")('sk_test_51NHF7iIR6WFhZtkiVnEgaAqWgFBpxYLH4KndpJjyoomM3ivX0XFdXfXS1ij5oiXlGlnKsool6X9DxLcjwGOIy2Vu00MLdLOsJr');
-
-app.use(express.static("public"));
 app.use(express.json());
-
 app.use(cors());
 
-const calculateOrderAmount = (items) => {
-  // Calculate the order total on the server to prevent
-  // people from directly manipulating the amount on the client
-  let total = 0;
-  items.forEach((item) => {
-    total += item.amount;
-  });
-  return total;
-};
+app.post("/create-payment-link", async (req, res) => {
+    try {
+        const { amount, description } = req.body;
 
-app.post("/create-payment-intent", async (req, res) => {
-  const { items } = req.body;
-console.log(items);
+        // Create a Stripe Checkout Session
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"],
+            line_items: [
+                {
+                    price_data: {
+                        currency: "usd",
+                        product_data: {
+                            name: "Payment",
+                            description: description,
+                        },
+                        unit_amount: amount * 100, // Stripe uses cents
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: "payment",
+            success_url: "https://yourwebsite.com/success",
+            cancel_url: "https://yourwebsite.com/cancel",
+        });
 
-  // Create a PaymentIntent with the order amount and currency
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: calculateOrderAmount(items),
-    currency: "usd",
-    // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-    automatic_payment_methods: {
-      enabled: true,
-    },
-  });
-
-  res.send({
-    clientSecret: paymentIntent.client_secret,
-  });
+        res.json({ paymentLink: session.url });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-
-app.listen(4242, () => console.log("Node server listening on port 4242!"));
+app.listen(4242, () => console.log("Server running on port 4242"));
