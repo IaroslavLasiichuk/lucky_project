@@ -7,6 +7,25 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+const book = {
+    author: "Willy Wonka",
+    name: "Random"
+};
+
+app.get("/book", async(req,res)=>{
+    res.json(book);
+})
+
+app.post("/add", async(req, res)=>{
+    try {
+        const { amount, description, name} = req.body;
+        console.log(name);
+        
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+   
+})
 app.post("/create-payment-link", async (req, res) => {
     try {
         const { amount, description, name } = req.body;
