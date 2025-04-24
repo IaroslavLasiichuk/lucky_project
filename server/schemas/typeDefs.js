@@ -7,12 +7,8 @@ scalar Upload
   type User {
     _id: ID
     username: String
-    role: String
-    carPlate: String
-    active: Boolean 
-    admin: Boolean  
-    events: [Event]!
-    guests: [Guest]!
+    jobs: [Job]!
+  
   }
 
   type Job {
@@ -52,59 +48,22 @@ scalar Upload
       parkingSpotId: String
       authorId: ID!
     ): Event
-    bookDesk(
-      date: String!
-      startTime: String!
-      endTime: String!
-      username: String!
-      deskId: String
-      authorId: ID!
-    ): DeskBooking
+   
     addSurvey(
       rate: String!
       comment: String
       features:[String]
       featureComment: String
     ): Survey
-    addGuest(
-      date: String!
-      startTime: String!
-      endTime: String!
-      relationship: String!
-      guestname: String!
-      username: String!
-    ): Guest
-    addParkingSpot(
-      name: String! 
-      availableFor: String
-    ): ParkingSpot
-    addDesk(
-      name: String! 
-    ): Desk
-    removeParkingSpot(_id: ID!): ParkingSpot
-    removeDesk(_id: ID!): Desk
-    removeEvent(eventId: ID!, date: String!): Event
-    removeDeskBooking(deskBookingId: ID!): DeskBooking
-    removeGuest(guestId: ID!, date: String!): Guest
+    removeJob(jobId: ID!, date: String!): Job
     updateUsername(username: String!): Message
     updatePassword(password: PasswordInput!): Message
-    deleteUser(_id: ID!): Message
-    addRole(role: String!): Message
-    addCarPlate(carPlate: String!): Message
-    updateUserStatus(userId: ID!, online: Boolean!): UserStatus
-    disactivateAccount(_id: ID!): Message
-    activateAccount(_id: ID!): Message
-    uploadImage(_id: ID!, file: Upload!): Message
   }
 
   type Subscription {
-    eventAdded: Event
-    eventRemoved: Event
-    guestAdded: Guest
-    guestRemoved: Guest
+    jobAdded: Event
+    jobRemoved: Event 
     userStatus: UserStatus
-    deskBooked: Desk
-    carPlateUpdated: User 
   }
 `;
 
