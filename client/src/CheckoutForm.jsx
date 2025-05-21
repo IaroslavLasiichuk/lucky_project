@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import {
   PaymentElement,
   useStripe,
-  useElements
+  useElements,
+  Elements 
 } from "@stripe/react-stripe-js";
 
 export default function CheckoutForm() {
@@ -50,6 +51,7 @@ export default function CheckoutForm() {
   }
 
   return (
+    <Elements stripe={stripePromise} options={options}>
     <form id="payment-form" onSubmit={handleSubmit}>
 
       <PaymentElement id="payment-element" options={paymentElementOptions} />
@@ -61,5 +63,6 @@ export default function CheckoutForm() {
       {/* Show any error or success messages */}
       {message && <div id="payment-message">{message}</div>}
     </form>
+    </Elements>
   );
 }
