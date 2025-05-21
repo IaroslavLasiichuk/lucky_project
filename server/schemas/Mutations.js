@@ -3,11 +3,7 @@ const { User, Job } = require("../models");
 
 
 const Mutations = {
-    addJob: async (
-      parent,
-      {  },
-      context
-    ) => {
+    addJob: async (parent,{  }, context) => {
       try {
       
       } catch (error) {

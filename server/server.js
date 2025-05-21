@@ -46,8 +46,8 @@ app.post("/create-payment-link", async (req, res) => {
                 },
             ],
             mode: "payment",
-            success_url: "https://yourwebsite.com/success",
-            cancel_url: "https://yourwebsite.com/cancel",
+            success_url: "http://localhost:5173/success",
+            cancel_url: "http://localhost:5173/cancel",
         });
 
         res.json({ paymentLink: session.url });
@@ -56,4 +56,4 @@ app.post("/create-payment-link", async (req, res) => {
     }
 });
 
-app.listen(4242, () => console.log("Server running on port 4242"));
+app.listen(4242, () => console.log(`Server running on port 4242 http://localhost:4242`));
